@@ -1,0 +1,105 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'io.freefair.lombok' version '8.4'  // Better Lombok integration
+}
+
+group = 'com.project'
+version = '0.0.1-SNAPSHOT'
+description = 'banking-project-assignment'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+// Version definitions
+ext {
+    // Spring Boot
+    set('springBootVersion', '3.5.5')
+
+    // JWT
+    set('jjwtVersion', '0.11.5')
+
+    // Database
+    set('postgresqlVersion', '42.7.0')
+
+    // Testing
+    set('junitJupiterVersion', '5.10.1')
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }  // For Spring milestones
+    maven { url 'https://repo.spring.io/snapshot' }   // For Spring snapshots
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+    }
+}
+
+dependencies {
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Database
+    runtimeOnly "org.postgresql:postgresql:${postgresqlVersion}"
+
+    // JWT
+    implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
+
+    // Development tools
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // Test dependencies
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // Additional test libraries
+    testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
+    testImplementation 'org.testcontainers:postgresql:1.19.3'  // For containerized testing
+    testImplementation 'org.testcontainers:junit-jupiter:1.19.3'
+}
+
+// Dependency version constraints
+dependencyManagement {
+    dependencies {
+        // Add version constraints for third-party libraries
+        dependency 'org.testcontainers:postgresql:1.19.3'
+        dependency 'org.testcontainers:junit-jupiter:1.19.3'
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        showStandardStreams = true
+    }
+}
+
+// Configure Java compilation
+tasks.named('compileJava') {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+tasks.named('compileTestJava') {
+    options.encoding = 'UTF-8'
+}
+
+// Build info generation
+springBoot {
+    buildInfo()
+}
