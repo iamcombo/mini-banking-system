@@ -25,8 +25,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGlobalException(Exception ex, WebRequest request) {
-        log.error(ex.getMessage());
         ex.printStackTrace();
+        log.error(ex.getMessage());
         ApiResponse<String> response = new ApiResponse<>(false, "500", "Internal Server Error", null);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -35,5 +35,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
         ApiResponse<String> response = new ApiResponse<>(false, "401", ex.getMessage(), null);
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+        ApiResponse<String> response = new ApiResponse<>(false, "403", ex.getMessage(), null);
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 }

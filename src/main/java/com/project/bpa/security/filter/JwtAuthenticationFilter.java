@@ -1,6 +1,6 @@
 package com.project.bpa.security.filter;
 
-import com.project.bpa.user.service.UserService;
+import com.project.bpa.authentication.user.service.UserService;
 import com.project.bpa.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
