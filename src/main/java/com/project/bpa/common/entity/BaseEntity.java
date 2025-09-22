@@ -13,10 +13,6 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -28,9 +24,6 @@ public abstract class BaseEntity {
     @Version
     @Column(name = "version")
     private Long version = 0L;
-
-    @Column(nullable = false)
-    private boolean active = true;
 
     @PrePersist
     protected void onCreate() {
