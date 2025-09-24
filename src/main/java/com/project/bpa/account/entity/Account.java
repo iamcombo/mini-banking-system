@@ -3,6 +3,7 @@ package com.project.bpa.account.entity;
 import com.project.bpa.account.enums.AccountTypeEnum;
 import com.project.bpa.authentication.user.entity.User;
 import com.project.bpa.common.entity.BaseEntity;
+import com.project.bpa.common.enums.CurrencyEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,6 +41,9 @@ public class Account extends BaseEntity {
 
     @Column(name = "balance", nullable = false, columnDefinition = "DECIMAL(10, 2) DEFAULT 0.0")
     private BigDecimal balance;
+
+    @Column(nullable = false)
+    private CurrencyEnum currency;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "account_type")
