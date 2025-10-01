@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -35,6 +36,6 @@ public class AuthenticationResponse {
     private User user;
 
     // Security Information
-    private Role role;
-    private List<String> permissions;
+//    private Role role;
+//    private Set<String> permissions;
 }

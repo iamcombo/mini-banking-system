@@ -66,7 +66,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(token)
                 .refreshToken(refreshToken)
                 .user(savedUser)
-                .role(user.getRole())
                 .build();
 
         return ApiResponse.successCreated(response);
@@ -88,7 +87,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(token)
                 .refreshToken(refreshToken)
                 .user(user)
-                .role(user.getRole())
                 .build();
 
         return ApiResponse.success(response);

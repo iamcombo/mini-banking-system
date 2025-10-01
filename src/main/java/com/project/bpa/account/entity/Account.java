@@ -36,9 +36,10 @@ public class Account extends BaseEntity {
     @Column(name = "account_number")
     private String accountNumber;
 
-    @Column(name = "balance", nullable = false, columnDefinition = "DECIMAL(10, 2) DEFAULT 0.0")
-    private BigDecimal balance;
+    @Column(name = "balance", nullable = false)
+    private BigDecimal balance = BigDecimal.ZERO;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CurrencyEnum currency;
 
