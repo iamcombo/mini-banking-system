@@ -1,5 +1,6 @@
 package com.project.bpa.security;
 
+import com.project.bpa.authentication.role.entity.Permission;
 import com.project.bpa.authentication.role.entity.Role;
 import com.project.bpa.authentication.role.entity.RolePermission;
 import com.project.bpa.authentication.role.repository.PermissionRepository;
@@ -29,7 +30,6 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
-        System.out.println(authentication + " 1 " + permission);
         if (authentication == null || !authentication.isAuthenticated() || !(permission instanceof String)) {
             return false;
         }
@@ -40,7 +40,6 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
-        System.out.println(authentication + "2" + permission);
         if (authentication == null || !authentication.isAuthenticated() || !(permission instanceof String)) {
             return false;
         }
@@ -117,9 +116,8 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         // Fallback: If using basic findByName, defensive copy prevents CME
         // List<RolePermission> rolePerms = new ArrayList<>(role.getRolePermissions());
 
-        return role.getRolePermissions().stream()
-                .filter(RolePermission::isActive)
-                .map(rp -> rp.getPermission().getName())
+        return role.getPermissions().stream()
+                .map(Permission::getName)
                 .anyMatch(permission::equals);
     }
 }

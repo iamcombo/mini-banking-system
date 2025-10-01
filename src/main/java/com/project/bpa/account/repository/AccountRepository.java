@@ -13,7 +13,6 @@ public interface AccountRepository extends BaseRepository<Account, Long> {
     Optional<Account> findByAccountHolderPhone(String accountHolderPhone);
     Optional<Account> findByAccountHolderEmail(String accountHolderEmail);
 
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Account a WHERE a.accountNumber = :accountNumber")
     Optional<Account> findByAccountNumberForUpdate(@Param("accountNumber") String accountNumber);

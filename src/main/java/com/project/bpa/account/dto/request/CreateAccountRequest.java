@@ -22,10 +22,6 @@ public class CreateAccountRequest {
     @NotNull(message = "Account type is required")
     private AccountTypeEnum accountType;
     
-    @NotNull(message = "User ID is required")
-    @Positive(message = "User ID must be a positive number")
-    private Long userId;
-    
     @NotBlank(message = "National ID is required")
     @Size(min = 5, max = 20, message = "National ID must be between 5 and 20 characters")
     private String nationalId;

@@ -6,9 +6,11 @@ import com.project.bpa.account.repository.AccountRepository;
 import com.project.bpa.account.service.AccountService;
 import com.project.bpa.authentication.user.entity.User;
 import com.project.bpa.authentication.user.repository.UserRepository;
+import com.project.bpa.common.enums.CurrencyEnum;
 import com.project.bpa.exception.ApiResponse;
 import com.project.bpa.exception.BadRequestException;
 import com.project.bpa.utils.AccountUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,15 +23,13 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
-    private final AccountUtil accountUtil;
 
     @Override
-    public ApiResponse<Account> createAccount(CreateAccountRequest body) {
-        // Check user is exists
-        Optional<User> user = userRepository.findById(body.getUserId());
-        if (user.isEmpty()) {
-            throw new BadRequestException("User not found");
-        }
+    @Transactional
+    public ApiResponse<Account> createAccount(String username, CreateAccountRequest body) {
+        // Get user by username
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new BadRequestException("User not found"));
 
         // Check phone number and email is unique
         Optional<Account> accountByPhone = accountRepository.findByAccountHolderPhone(body.getAccountHolderPhone());
@@ -39,7 +39,7 @@ public class AccountServiceImpl implements AccountService {
         }
 
         // Generate account number
-        String accountNumber = accountUtil.generateAccountNumber();
+        String accountNumber = AccountUtil.generateAccountNumber();
 
         // Create account
         Account account = Account.builder()
@@ -50,12 +50,13 @@ public class AccountServiceImpl implements AccountService {
                 .accountType(body.getAccountType())
                 .balance(BigDecimal.ZERO)
                 .nationalId(body.getNationalId())
-                .user(user.get())
+                .currency(CurrencyEnum.USD)
+                .user(user)
                 .build();
 
         // Save account
         Account savedAccount = accountRepository.save(account);
 
-        return ApiResponse.success(savedAccount);
+        return ApiResponse.successCreated(savedAccount);
     }
 }

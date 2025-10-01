@@ -2,7 +2,6 @@ package com.project.bpa.authentication.user.entity;
 
 import com.project.bpa.authentication.auth.enums.UserStatusEnum;
 import com.project.bpa.authentication.role.entity.Role;
-import com.project.bpa.authentication.role.entity.RolePermission;
 import com.project.bpa.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -13,10 +12,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 import java.util.Collection;
@@ -68,6 +68,9 @@ public class User extends BaseEntity implements UserDetails {
     @JoinColumn(name = "role_id")
     private Role role;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Override
     @Transient
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -82,13 +85,11 @@ public class User extends BaseEntity implements UserDetails {
         authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()));
 
         // Add each permission as a GrantedAuthority
-        if (role.getRolePermissions() != null) {
-            role.getRolePermissions().stream()
-                .filter(RolePermission::isActive)
-                .map(RolePermission::getPermission)
-                .filter(Objects::nonNull)
-                .map(permission -> new SimpleGrantedAuthority(permission.getName()))
-                .forEach(authorities::add);
+        if (role.getPermissions() != null) {
+            role.getPermissions().stream()
+                    .filter(Objects::nonNull)
+                    .map(permission -> new SimpleGrantedAuthority(permission.getName()))
+                    .forEach(authorities::add);
         }
 
         return authorities;

@@ -12,14 +12,4 @@ import java.util.Optional;
 
 @NoRepositoryBean
 public interface BaseRepository<T extends BaseEntity, ID> extends JpaRepository<T, ID>, JpaSpecificationExecutor<T> {
-
-    Optional<T> findByIdAndActive(ID id, boolean active);
-
-    List<T> findAllByActive(boolean active);
-
-    Page<T> findAllByActive(boolean active, Pageable pageable);
-
-    boolean existsByIdAndActive(ID id, boolean active);
-
-    long countByActive(boolean active);
 }

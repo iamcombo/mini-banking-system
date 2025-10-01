@@ -5,6 +5,7 @@ import com.project.bpa.account.repository.AccountRepository;
 import com.project.bpa.exception.ApiResponse;
 import com.project.bpa.exception.BadRequestException;
 import com.project.bpa.exception.NotFoundException;
+import com.project.bpa.transaction.dto.request.ListTransactionFilter;
 import com.project.bpa.transaction.dto.request.TransferBalanceRequest;
 import com.project.bpa.transaction.entity.Transaction;
 import com.project.bpa.transaction.enums.TransactionStatusEnum;
@@ -13,6 +14,12 @@ import com.project.bpa.transaction.repository.TransactionRepository;
 import com.project.bpa.transaction.service.TransactionService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -59,4 +66,15 @@ public class TransactionServiceImpl implements TransactionService {
 
         return ApiResponse.success("Transfer successful");
     }
+
+    @Override
+    public ApiResponse<Page<Transaction>> getAdminTransactionHistory(ListTransactionFilter requestParam) {
+        return null;
+    }
+
+    @Override
+    public ApiResponse<Page<Transaction>> getUserTransactionHistory(String accountNumber, Pageable pageable) {
+        return null;
+    }
+
 }

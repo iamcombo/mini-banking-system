@@ -11,8 +11,7 @@ public interface RoleRepository extends BaseRepository<Role, Long> {
     Optional<Role> findByName(String name);
 
     @Query("SELECT DISTINCT r FROM Role r " +
-            "LEFT JOIN FETCH r.rolePermissions rp " +
-            "LEFT JOIN FETCH rp.permission " +
+            "LEFT JOIN FETCH r.permissions p " +
             "WHERE r.name = :name")
     Optional<Role> findByNameWithPermissions(@Param("name") String name);
 }

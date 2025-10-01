@@ -1,6 +1,7 @@
 package com.project.bpa.authentication.auth.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.project.bpa.authentication.role.entity.Role;
 import com.project.bpa.authentication.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,6 @@ public class AuthenticationResponse {
     // Token Information
     private String accessToken;
     private String refreshToken;
-    private String tokenType;
 
     // Token Metadata
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
@@ -34,17 +34,7 @@ public class AuthenticationResponse {
     // User Information
     private User user;
 
-    // Application Information
-    private String applicationName;
-    private String version;
-    private String environment;
-
     // Security Information
-    private List<String> scopes;
-    private List<String> roles;
+    private Role role;
     private List<String> permissions;
-
-    // Status Information
-    private String status;
-    private String message;
 }

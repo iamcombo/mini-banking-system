@@ -1,13 +1,16 @@
 package com.project.bpa.authentication.auth.service.impl;
 
 import com.project.bpa.authentication.auth.dto.request.LoginRequest;
+import com.project.bpa.authentication.auth.dto.request.RefreshTokenRequest;
 import com.project.bpa.authentication.auth.dto.request.RegisterRequest;
 import com.project.bpa.authentication.auth.dto.response.AuthenticationResponse;
+import com.project.bpa.authentication.auth.dto.response.RefreshTokenResponse;
 import com.project.bpa.authentication.role.entity.Role;
 import com.project.bpa.authentication.user.entity.User;
 import com.project.bpa.authentication.role.repository.RoleRepository;
 import com.project.bpa.authentication.user.repository.UserRepository;
 import com.project.bpa.authentication.auth.service.AuthenticationService;
+import com.project.bpa.exception.ApiResponse;
 import com.project.bpa.exception.BadRequestException;
 import com.project.bpa.exception.UnauthorizedException;
 import com.project.bpa.authentication.user.service.UserService;
@@ -28,7 +31,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public AuthenticationResponse register(RegisterRequest body) {
+    public ApiResponse<AuthenticationResponse> register(RegisterRequest body) {
         final boolean isUsernameExist = userRepository.existsByUsername(body.getUsername());
         if (isUsernameExist) { throw new BadRequestException("Username already exist!"); }
 
@@ -49,22 +52,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(body.getEmail())
                 .firstName(body.getFirstName())
                 .lastName(body.getLastName())
+                .phoneNumber(body.getPhone())
                 .role(role)
                 .build();
 
-        userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         final UserDetails userDetails = userDetailService.loadUserByUsername(body.getUsername());
         final String token = jwtUtil.generateToken(userDetails);
+        final String refreshToken = jwtUtil.generateRefreshToken(userDetails);
 
-        return AuthenticationResponse.builder()
+        AuthenticationResponse response = AuthenticationResponse.builder()
                 .accessToken(token)
-                .refreshToken(token)
+                .refreshToken(refreshToken)
+                .user(savedUser)
+                .role(user.getRole())
                 .build();
+
+        return ApiResponse.successCreated(response);
     }
 
     @Override
-    public AuthenticationResponse login(LoginRequest body) {
+    public ApiResponse<AuthenticationResponse> login(LoginRequest body) {
         User user = userRepository.findByUsername(body.getUsername())
                 .orElseThrow(() -> new UnauthorizedException("Invalid credential!"));
 
@@ -73,9 +82,41 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new UnauthorizedException("Invalid credential!");
         }
 
-        String token = jwtUtil.generateToken(user);
-        return AuthenticationResponse.builder()
+        final String token = jwtUtil.generateToken(user);
+        final String refreshToken = jwtUtil.generateRefreshToken(user);
+        AuthenticationResponse response = AuthenticationResponse.builder()
                 .accessToken(token)
+                .refreshToken(refreshToken)
+                .user(user)
+                .role(user.getRole())
                 .build();
+
+        return ApiResponse.success(response);
+    }
+
+    @Override
+    public ApiResponse<RefreshTokenResponse> refreshToken(RefreshTokenRequest body) {
+        // Extract username from the refresh token
+        String username = jwtUtil.extractUsername(body.getRefreshToken());
+
+        // Load user details
+        UserDetails userDetails = userDetailService.loadUserByUsername(username);
+
+        // Validate the refresh token
+        if (!jwtUtil.validateToken(body.getRefreshToken(), userDetails)) {
+            throw new UnauthorizedException("Invalid refresh token!");
+        }
+
+        // Generate new tokens
+        String newAccessToken = jwtUtil.generateToken(userDetails);
+        String newRefreshToken = jwtUtil.generateRefreshToken(userDetails);
+
+        // Build the response
+        RefreshTokenResponse response = RefreshTokenResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+
+        return ApiResponse.success(response);
     }
 }

@@ -52,8 +52,8 @@ public class PermissionServiceImpl implements PermissionService {
                 .orElseThrow(() -> new NotFoundException("Permission not found with id: " + permissionId));
 
         // Check if the permission is already assigned
-        boolean alreadyAssigned = role.getRolePermissions().stream()
-                .anyMatch(rp -> rp.getPermission().getId().equals(permissionId));
+        boolean alreadyAssigned = role.getPermissions().stream()
+                .anyMatch(pm -> pm.getId().equals(permissionId));
 
         if (!alreadyAssigned) {
             role.addPermission(permission);

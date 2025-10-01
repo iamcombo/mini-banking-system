@@ -1,6 +1,5 @@
 package com.project.bpa.authentication.role.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +24,6 @@ public class RolePermission implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("roleId")
     @JoinColumn(name = "role_id")
-    @JsonIgnore
     private Role role;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -33,7 +31,7 @@ public class RolePermission implements Serializable {
     @JoinColumn(name = "permission_id")
     private Permission permission;
     
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active", nullable = false, columnDefinition = "boolean default true")
     private boolean isActive = true;
     
     /**

@@ -23,9 +23,14 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(true, "200", "Successfully", data);
     }
-
     public static <T> ApiResponse<T> success() {
         return new ApiResponse<>(true, "200", "Successfully", null);
+    }
+    public static <T> ApiResponse<T> successCreated() {
+        return new ApiResponse<>(true, "201", "Successfully created", null);
+    }
+    public static <T> ApiResponse<T> successCreated(T data) {
+        return new ApiResponse<>(true, "201", "Successfully created", data);
     }
 
     public static <T> ApiResponse<T> error(String statusCode, String message) {

@@ -26,6 +26,9 @@ ext {
     // Database
     set('postgresqlVersion', '42.7.0')
 
+    // Swagger
+    set('springdocVersion', '2.8.13')
+
     // Testing
     set('junitJupiterVersion', '5.10.1')
 }
@@ -60,6 +63,9 @@ dependencies {
     // Development tools
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // Documentation
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}")
 
     // Test dependencies
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

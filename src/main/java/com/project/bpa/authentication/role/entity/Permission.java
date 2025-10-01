@@ -1,5 +1,6 @@
 package com.project.bpa.authentication.role.entity;
 
+import com.project.bpa.authentication.enums.PermissionCategoryEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,5 +21,5 @@ public class Permission {
 
     private String description;
 
-    private String category;
+    private PermissionCategoryEnum category;
 }
