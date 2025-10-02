@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegisterRequest {
     @NotBlank(message = "Username is required")
-    //@ValidUsername(minLength = 3, maxLength = 50)
     private String username;
 
     @NotBlank(message = "Email is required")
@@ -22,7 +21,6 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank(message = "Password is required")
-    //@StrongPassword(minLength = 8)
     private String password;
 
     @JsonProperty("first_name")
@@ -30,8 +28,6 @@ public class RegisterRequest {
 
     @JsonProperty("last_name")
     private String lastName;
-
-    private String roleName = null;
 
     @JsonProperty("phone")
     private String phone;

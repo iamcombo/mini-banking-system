@@ -1,7 +1,6 @@
 package com.project.bpa.security.filter;
 
-import com.project.bpa.authentication.user.service.UserService;
-import com.project.bpa.exception.UnauthorizedException;
+import com.project.bpa.security.user.CustomUserDetailsService;
 import com.project.bpa.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,7 +24,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
-    private final UserService userService;
+    private final CustomUserDetailsService customUserDetailsService;
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Override
@@ -48,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             username = jwtUtil.extractUsername(jwt);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userService.loadUserByUsername(username);
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
                 if (jwtUtil.validateToken(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -57,21 +56,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
             filterChain.doFilter(request, response);
-        } catch (AuthorizationDeniedException ex) {
-            log.error("Authorization denied: " + ex.getMessage());
-            writeUnauthorizedResponse(response, ex.getMessage());
         } catch (Exception ex) {
-            log.error("Authorization denied: " + ex.getMessage());
-            writeUnauthorizedResponse(response, "Unauthorized");
+            log.error(">>> [JwtAuthenticationFilter/doFilterInternal]" + ex.getMessage());
         }
-    }
-
-    private void writeUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
-        if (response.isCommitted()) {
-            return;
-        }
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
-        response.getWriter().write("{\"message\":\"" + message + "\"}");
     }
 }

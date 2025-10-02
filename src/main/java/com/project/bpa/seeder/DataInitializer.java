@@ -68,7 +68,7 @@ public class DataInitializer {
 
         // Assign basic permissions to USER role
         if (userRole.getPermissions().isEmpty()) {
-            List<String> userPermissions = Arrays.asList("TRANSFER", "VIEW_TRANSACTIONS", "CREATE_ACCOUNT");
+            List<String> userPermissions = Arrays.asList("TRANSFER", "VIEW_TRANSACTIONS", "CREATE_ACCOUNT", "VIEW_ALL_ACCOUNTS");
             permissionRepository.findByNameIn(userPermissions).forEach(userRole::addPermission);
             roleRepository.save(userRole);
         }

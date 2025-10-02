@@ -1,10 +1,10 @@
 package com.project.bpa.account.controller;
 
-
 import com.project.bpa.account.dto.request.CreateAccountRequest;
-import com.project.bpa.account.entity.Account;
+import com.project.bpa.account.dto.response.AccountResponse;
 import com.project.bpa.account.service.AccountService;
 import com.project.bpa.exception.ApiResponse;
+import com.project.bpa.security.user.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,11 +12,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -30,10 +28,28 @@ public class AccountController {
     @PreAuthorize("hasAuthority('CREATE_ACCOUNT')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create account", description = "Create a new account")
-    public ApiResponse<Account> createAccount(
-            @AuthenticationPrincipal UserDetails userDetails,
+    public ApiResponse<AccountResponse> createAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid CreateAccountRequest body) {
-        String username = userDetails.getUsername();
-        return accountService.createAccount(username, body);
+        return accountService.createAccount(userDetails, body);
+    }
+
+    @GetMapping("/list")
+    @PreAuthorize("hasAuthority('VIEW_ALL_ACCOUNTS')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "List user accounts", description = "List all user accounts")
+    public ApiResponse<List<AccountResponse>> listUserAccounts(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return accountService.listUserAccounts(userDetails);
+    }
+
+    @GetMapping("/detail/{accountNumber}")
+    @PreAuthorize("hasAuthority('VIEW_ALL_ACCOUNTS')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Get account by account number", description = "Get account by account number")
+    public ApiResponse<AccountResponse> getAccountByAccountNumber(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable String accountNumber) {
+        return accountService.getAccountByAccountNumber(userDetails, accountNumber);
     }
 }

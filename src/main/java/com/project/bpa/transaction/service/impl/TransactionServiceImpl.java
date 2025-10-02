@@ -4,24 +4,27 @@ import com.project.bpa.account.entity.Account;
 import com.project.bpa.account.repository.AccountRepository;
 import com.project.bpa.authentication.user.entity.User;
 import com.project.bpa.authentication.user.repository.UserRepository;
+import com.project.bpa.common.enums.CurrencyEnum;
 import com.project.bpa.exception.ApiResponse;
 import com.project.bpa.exception.BadRequestException;
 import com.project.bpa.exception.NotFoundException;
-import com.project.bpa.transaction.dto.request.ListTransactionFilter;
+import com.project.bpa.security.user.CustomUserDetails;
 import com.project.bpa.transaction.dto.request.DepositRequest;
 import com.project.bpa.transaction.dto.request.TransferBalanceRequest;
+import com.project.bpa.transaction.dto.request.WithdrawRequest;
 import com.project.bpa.transaction.entity.Transaction;
 import com.project.bpa.transaction.enums.TransactionStatusEnum;
 import com.project.bpa.transaction.enums.TransactionTypeEnum;
 import com.project.bpa.transaction.repository.TransactionRepository;
 import com.project.bpa.transaction.service.TransactionService;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -70,22 +73,16 @@ public class TransactionServiceImpl implements TransactionService {
         accountRepository.save(senderAccount);
         accountRepository.save(destinationAccount);
 
-        return ApiResponse.success("Transfer successful");
+        return ApiResponse.success("Transfer successfully");
     }
 
     @Override
     @Transactional
     public ApiResponse<String> depositBalance(String username, DepositRequest body) {
         Optional<Account> _account = accountRepository.findByAccountNumberForUpdate(body.getAccountNumber());
-
         if (_account.isEmpty()) throw new NotFoundException("Account not found");
 
         Account account = _account.get();
-
-        // Validate currency consistency
-        if (account.getCurrency() == null || body.getCurrency() == null || account.getCurrency() != body.getCurrency()) {
-            throw new BadRequestException("Currency mismatch with account");
-        }
 
         // Update balance
         account.setBalance(account.getBalance().add(body.getAmount()));
@@ -98,8 +95,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .fromAccountNumber(body.getAccountNumber())
                 .toAccountNumber(body.getAccountNumber())
                 .amount(body.getAmount())
-                .currency(body.getCurrency())
-                .remark(body.getRemark())
+                .currency(CurrencyEnum.USD)
+                .remark("Deposit")
                 .proceedBy(user)
                 .trxDate(LocalDateTime.now())
                 .trxType(TransactionTypeEnum.DEPOSIT)
@@ -109,17 +106,50 @@ public class TransactionServiceImpl implements TransactionService {
         transactionRepository.save(transactionPayload);
         accountRepository.save(account);
 
-        return ApiResponse.success("Deposit successful");
+        return ApiResponse.success("Deposit successfully");
     }
 
     @Override
-    public ApiResponse<Page<Transaction>> getAdminTransactionHistory(ListTransactionFilter requestParam) {
-        return null;
+    @Transactional
+    public ApiResponse<String> withdrawBalance(CustomUserDetails userDetails, WithdrawRequest body) {
+        Optional<Account> _account = accountRepository.findByAccountNumberForUpdate(body.getAccountNumber());
+        if (_account.isEmpty()) throw new NotFoundException("Account not found");
+
+        Account account = _account.get();
+
+        // Check if the account belongs to the user
+        if (!account.getUser().getUsername().equals(userDetails.getUsername()))
+            throw new BadRequestException("Account does not belong to the user");
+
+        // Check if the account has enough balance
+        if (account.getBalance().compareTo(body.getAmount()) < 0)
+            throw new BadRequestException("Insufficient balance");
+
+        // Update balance
+        account.setBalance(account.getBalance().subtract(body.getAmount()));
+
+        Transaction transactionPayload = Transaction.builder()
+                .fromAccountNumber(body.getAccountNumber())
+                .toAccountNumber(body.getAccountNumber())
+                .amount(body.getAmount())
+                .currency(CurrencyEnum.USD)
+                .remark("Withdraw")
+                .proceedBy(userDetails.getUser())
+                .trxDate(LocalDateTime.now())
+                .trxType(TransactionTypeEnum.WITHDRAW)
+                .trxStatus(TransactionStatusEnum.COMPLETED)
+                .build();
+
+        transactionRepository.save(transactionPayload);
+        accountRepository.save(account);
+
+        return ApiResponse.success("Withdraw successfully");
     }
 
     @Override
-    public ApiResponse<Page<Transaction>> getUserTransactionHistory(String accountNumber, Pageable pageable) {
-        return null;
+    public ApiResponse<List<Transaction>> getUserTransactionHistory(String accountNumber, Pageable pageable) {
+        Page<Transaction> page = transactionRepository
+                .findByFromAccountNumberOrToAccountNumberOrderByTrxDateDesc(accountNumber, accountNumber, pageable);
+        return ApiResponse.success(page.getContent());
     }
-
 }

@@ -7,11 +7,14 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends BaseRepository<Account, Long> {
     Optional<Account> findByAccountHolderPhone(String accountHolderPhone);
     Optional<Account> findByAccountHolderEmail(String accountHolderEmail);
+    List<Account> findAllByUserUsername(String username);
+    Optional<Account> findByAccountNumber(String accountNumber);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Account a WHERE a.accountNumber = :accountNumber")

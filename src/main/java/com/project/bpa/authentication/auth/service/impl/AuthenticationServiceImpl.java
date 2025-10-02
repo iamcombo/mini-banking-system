@@ -13,8 +13,9 @@ import com.project.bpa.authentication.auth.service.AuthenticationService;
 import com.project.bpa.exception.ApiResponse;
 import com.project.bpa.exception.BadRequestException;
 import com.project.bpa.exception.UnauthorizedException;
-import com.project.bpa.authentication.user.service.UserService;
+import com.project.bpa.security.user.CustomUserDetailsService;
 import com.project.bpa.utils.JwtUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,23 +25,22 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final UserService userDetailService;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CustomUserDetailsService userDetailService;
 
     @Override
+    @Transactional
     public ApiResponse<AuthenticationResponse> register(RegisterRequest body) {
         final boolean isUsernameExist = userRepository.existsByUsername(body.getUsername());
         if (isUsernameExist) { throw new BadRequestException("Username already exist!"); }
 
         final String encodedPassword = passwordEncoder.encode(body.getPassword());
 
-        // Get the default role (e.g., "USER") if none is provided
-        String roleName = (body.getRoleName() != null && !body.getRoleName().isEmpty()) ?
-                body.getRoleName() : "USER";
-
+        // Get the default role (e.g., "USER")
+        String roleName = "USER";
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new BadRequestException("Invalid role specified: " + roleName));
 
@@ -65,13 +65,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         AuthenticationResponse response = AuthenticationResponse.builder()
                 .accessToken(token)
                 .refreshToken(refreshToken)
-                .user(savedUser)
                 .build();
 
         return ApiResponse.successCreated(response);
     }
 
     @Override
+    @Transactional
     public ApiResponse<AuthenticationResponse> login(LoginRequest body) {
         User user = userRepository.findByUsername(body.getUsername())
                 .orElseThrow(() -> new UnauthorizedException("Invalid credential!"));
@@ -86,13 +86,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         AuthenticationResponse response = AuthenticationResponse.builder()
                 .accessToken(token)
                 .refreshToken(refreshToken)
-                .user(user)
                 .build();
 
         return ApiResponse.success(response);
     }
 
     @Override
+    @Transactional
     public ApiResponse<RefreshTokenResponse> refreshToken(RefreshTokenRequest body) {
         // Extract username from the refresh token
         String username = jwtUtil.extractUsername(body.getRefreshToken());

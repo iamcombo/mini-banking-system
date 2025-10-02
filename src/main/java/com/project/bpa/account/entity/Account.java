@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "accounts")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

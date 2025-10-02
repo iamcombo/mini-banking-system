@@ -17,25 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthenticationResponse {
-
     // Token Information
     private String accessToken;
     private String refreshToken;
-
-    // Token Metadata
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private LocalDateTime issuedAt;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private LocalDateTime accessTokenExpiresAt;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
-    private LocalDateTime refreshTokenExpiresAt;
-    private Long accessTokenExpiresIn; // seconds
-    private Long refreshTokenExpiresIn; // seconds
-
-    // User Information
-    private User user;
-
-    // Security Information
-//    private Role role;
-//    private Set<String> permissions;
 }

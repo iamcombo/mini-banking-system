@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 
-public interface UserService extends UserDetailsService {
+public interface UserService {
     ApiResponse<List<User>> listUsers(String search, UserStatusEnum status, Pageable pageable);
     ApiResponse<User> getUserById(Long id);
     ApiResponse<String> updateUser(Long id, UpdateUserRequest body);
